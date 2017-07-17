@@ -1,0 +1,8 @@
+# I know this probably looks a bit ugly, but it works and that's what fucking counts
+
+rrnorm <- c(-10, 0, 10, 100)
+(output <- tibble(v1 = 1:40, v2 = 1:40, v3 = 1:40, v4 = 1:40))
+for (i in seq_along(rrnorm)) {
+  output[[i]] <- rnorm(n = 10, mean = rrnorm[[i]])
+}
+output
