@@ -38,5 +38,4 @@ dupes <- function(dataframe, ...) {
   dupe.list <<- print(dupe.list)
   dupe.filter <<- semi_join(dataframe, dupe.list, by = ...)
 }
-
 dupes(test, "word")
