@@ -30,12 +30,14 @@ cat(output$x)
 #My first motherfucking useful function
 #Get a list of duplicates in a column that save to the global environment. Version 2 
 #will include a way to make a list out of those saved results, maybe
-dupes <- function(dataframe, ...) {
+one_col_dupes <- function(dataframe, ...) {
   dupe.list <- dataframe %>% 
     group_by_(...) %>%
     summarise(n = n()) %>%
     filter(n > 1)
   dupe.list <<- print(dupe.list)
-  dupe.filter <<- semi_join(dataframe, dupe.list, by = ...)
+  dupe.filter <<- print(semi_join(dataframe, dupe.list, by = ...))
+}
+one_col_dupes(test, "numbers")
 }
 dupes(test, "word")
