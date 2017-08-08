@@ -1,6 +1,6 @@
 # I know this probably looks a bit ugly, but it works and that's what fucking counts
 
-
+###################
 #Generate 
 rrnorm <- c(-10, 0, 10, 100)
 (output <- tibble(v1 = 1:40, v2 = 1:40, v3 = 1:40, v4 = 1:40))
@@ -9,6 +9,7 @@ for (i in seq_along(rrnorm)) {
 }
 output
 
+####################
 #Write the lyrics to "99 bottles of beer on the wall"
 a <- "X bottles of beer on the wall, X bottles of beer.\n Take one down, pass it around, Y bottles of beer on the wall.\n\n"
 output <- tibble(x = rep(""), y = 99:0)
@@ -23,5 +24,19 @@ for (i in seq_along(output$x)) {
     output$x[[i]] <- str_replace_all(output$x[[i]], "Take one down.*\\n", "Go to the store and buy some more, 99 bottles of beer on the wall.")
   }
 }
-
 cat(output$x)
+
+###################
+#My first motherfucking useful function
+#Get a list of duplicates in a column that save to the global environment. Version 2 
+#will include a way to make a list out of those saved results, maybe
+dupes <- function(dataframe, ...) {
+  dupe.list <- dataframe %>% 
+    group_by_(...) %>%
+    summarise(n = n()) %>%
+    filter(n > 1)
+  dupe.list <<- print(dupe.list)
+  dupe.filter <<- semi_join(dataframe, dupe.list, by = ...)
+}
+
+dupes(test, "word")
