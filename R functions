@@ -26,6 +26,25 @@ for (i in seq_along(output$x)) {
 }
 cat(output$x)
 
+#################
+#Find the number of days it takes to get a full deck of cards
+num.simulations = 10000
+deck <- 1:52
+full.deck <- function(collected) all(deck %in% collected)
+lengths = vector(,num.simulations)
+
+for (i in 1:num.simulations)
+{
+  collected <- c()
+
+  while(!full.deck(collected))
+  {
+    collected <- c(collected, sample(52,1)) 
+  }
+  lengths[i] = length(collected)
+}    
+summary(lengths)
+
 ###################
 #My first motherfucking useful function
 #Get a list of duplicates in a column that save to the global environment. Version 2 
