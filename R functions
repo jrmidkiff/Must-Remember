@@ -60,3 +60,24 @@ one_col_dupes <- function(dataframe, ...) {
 one_col_dupes(test, "numbers")
 }
 dupes(test, "word")
+
+#################
+#Copy a certain formatting between lots of different ggplot graphs even if the underlying data changes
+
+esi_colors <- c("#1A4B2B", "#437A37", "#5A0000", "#022434", "#737C74", "#BCBEB9", "#75937f") #list of custom (aka ESI) colors
+
+esi_formatting <- 
+  list(scale_fill_manual(values = esi_colors),
+  theme(axis.text.x = element_text(size = 12, family = "Arial"),
+        axis.text.y = element_text(size = 14, family = "Arial"),
+        panel.border = element_rect(color = "black", linetype = "solid", fill = NA),
+        axis.title = element_text(size = 18, face = "bold", family = "Arial"),
+        axis.title.x = element_blank(), 
+        axis.title.y = element_text(size = 16, family = "Arial"),
+        legend.position = "none",
+        title = element_text(size = 18),
+        strip.text = element_text(size = 13, face = "bold", family = "Arial"),
+        strip.background = element_blank(),
+        panel.background = element_blank()))
+
+#Then simply do `+ esi_formatting` to the ggplots
