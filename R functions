@@ -81,3 +81,30 @@ esi_formatting <-
         panel.background = element_blank()))
 
 #Then simply do `+ esi_formatting` to the ggplots
+
+
+
+###############
+#Apply functions
+
+#Get certain element from a list (e.g. a row or column)
+(A <- matrix(1:9, nrow = 3, ncol = 3))
+(B <- matrix(4:15, nrow = 4, ncol = 3))
+(C <- matrix(8:10, nrow = 3, ncol = 2))
+(MyList <- list(A, B, C))
+lapply(MyList, "[", , 2) #Get everything in the second column
+lapply(MyList, "[", 1, ) #Get everything in the first row
+#Use sapply() or unlist() to turn the vector lists into a single vector of integers
+
+#Do a massive gsub
+survey <- 
+  lapply(survey,
+         function(x) {
+           gsub("important", "Important", x) #Substitute "important" for "Important" across the entire dataset
+         }
+  ) 
+# Do a massive fct_relevel
+survey[92:124] <- (lapply(survey[92:124], fct_relevel,
+                          "Not Important", "Somewhat Important", "Important", "Very Important", 
+                          "Extremely Important", "N/A"))
+# Arguments within fct_relevel, mean, range, or whatever the inner FUN is get tacked on to the end outside of the FUN parentheses
