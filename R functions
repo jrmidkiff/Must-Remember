@@ -108,3 +108,26 @@ survey[92:124] <- (lapply(survey[92:124], fct_relevel,
                           "Not Important", "Somewhat Important", "Important", "Very Important", 
                           "Extremely Important", "N/A"))
 # Arguments within fct_relevel, mean, range, or whatever the inner FUN is get tacked on to the end outside of the FUN parentheses
+
+###############
+## #Gathering the ethnicities
+# ethnicities <- list(black, asian, white, hispanic)
+# groups <- c("black", "asian", "white", "hispanic")
+# rel_names <- str_replace_all(
+#   names(ethnicities[[1]]), "[[[:punct:]]\\s]", "") #Take all punctuation junk out of relevant columns
+# rel_names <- rel_names[c(3, 4, 22)] #Select only relevant columns
+# 
+# for (i in seq_along(ethnicities)) {
+#   names(ethnicities[[i]]) <- str_replace_all(
+#     names(ethnicities[[i]]), "[[[:punct:]]\\s]", "") #get rid of punct in names
+#   ethnicities[[i]] <- ethnicities[[i]] %>%
+#     select(rel_names)
+#   rel_names2 <- c("Geography", groups[[i]], "group")
+#   colnames(ethnicities[[i]]) <- rel_names2
+#   ethnicities[[i]] <- ethnicities[[i]] %>%
+#     select(-group)
+# }
+# ethnicities
+# 
+# (final_ethnicities <- bind_cols(ethnicities[1:4]) %>%
+#   select(-matches("\\d$"))) #Getting rid of extra columns
