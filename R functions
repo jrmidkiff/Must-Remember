@@ -131,3 +131,14 @@ survey[92:124] <- (lapply(survey[92:124], fct_relevel,
 # 
 # (final_ethnicities <- bind_cols(ethnicities[1:4]) %>%
 #   select(-matches("\\d$"))) #Getting rid of extra columns
+
+
+#Massive str_replace_all ###########
+a <- survey %>% #In downloading the file as a csv, excel converted many of the zip codes to numbers 
+  mutate(`In what zip code do you live currently?Open-Ended Response` = 
+           str_replace_all(`In what zip code do you live currently?Open-Ended Response`, c(
+             "^8(?=\\d{3})" = "08", #Replaces 8 followed by three numbers with '08'
+             "^9(?=\\d{3})" ="19",  #Replaces 9 followed by three numbers with '19'
+             "[:alpha:]" =  "",     #Removes all alpha characters
+             "^\\d{1,4}$" = "Other",#Zips with 4 or fewer numbers are replaced with "Other"
+             ".*61.*" =  "08108"))) #One-off correction
