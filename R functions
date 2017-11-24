@@ -169,3 +169,37 @@ my_summarise <- function(df, group_by, var) {
     summarise(a = mean(!!var))
 }
 my_summarise(df, g1, a)
+
+my_summarise2 <- function(df, expr) {
+  expr <- enquo(expr)
+  
+  summarise(df, 
+    mean = mean(!!expr),
+    sum = sum(!!expr),
+    n = n()
+  )
+}
+my_summarise2(df, a * b)
+
+my_mutate <- function(df, expr) {
+  expr <- enquo(expr)
+  mean_name <- paste0("mean_", quo_name(expr))
+  sum_name <- paste0("sum_", quo_name(expr))
+  
+  mutate(df, 
+    !!mean_name := mean(!!expr), 
+    !!sum_name := sum(!!expr)
+  )
+}
+
+my_mutate(df, a)
+
+my_summarise <- function(df, ...) {
+  group_by <- quos(...)
+
+  df %>%
+    group_by(!!!group_by) %>%
+    summarise(a = mean(a))
+}
+
+my_summarise(df, g1, g2)
