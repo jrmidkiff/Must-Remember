@@ -142,3 +142,30 @@ a <- survey %>% #In downloading the file as a csv, excel converted many of the z
              "[:alpha:]" =  "",     #Removes all alpha characters
              "^\\d{1,4}$" = "Other",#Zips with 4 or fewer numbers are replaced with "Other"
              ".*61.*" =  "08108"))) #One-off correction
+
+#Using dplyr in functions##########
+df <- tibble(
+  g1 = c(1, 1, 2, 2, 2),
+  g2 = c(1, 2, 1, 2, 1),
+  a = sample(5), 
+  b = sample(5)
+)
+
+my_summarise <- function(df, group_var, var) {
+  df %>%
+    group_by(!!group_var) %>%
+    summarise(a = mean(a))
+}
+my_summarise(df, quo(g1))
+
+# and making it easier:
+my_summarise <- function(df, group_by, var) {
+  group_by <- enquo(group_by)
+  var <- enquo(var)
+  print(group_by)
+  
+  df %>%
+    group_by(!!group_by) %>%
+    summarise(a = mean(!!var))
+}
+my_summarise(df, g1, a)
