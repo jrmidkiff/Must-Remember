@@ -3,7 +3,7 @@ This is code for things that I have to remember how to do for work that I am oth
 
 
 ## SQL  
-Using CASE (equivalent to switch or multiple if-elses)  
+* Using CASE (equivalent to switch or multiple if-elses)  
 ``` SQL
 SELECT COUNT(*), 
 CASE 
