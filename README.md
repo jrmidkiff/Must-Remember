@@ -15,3 +15,9 @@ CASE
 FROM student_grades
 GROUP BY letter_grade;
 ```
+* Get the name of objects (or reports for ex.) out of a document
+```SQL
+SELECT MSysObjects.Name INTO tblTablesMoveAAP
+FROM MSysObjects
+WHERE (((Left([MSysObjects].[Name],3))="rpt"));
+```
