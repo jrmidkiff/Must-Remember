@@ -19,5 +19,5 @@ GROUP BY letter_grade;
 ```SQL
 SELECT MSysObjects.Name INTO tblTablesMoveAAP
 FROM MSysObjects
-WHERE (Left([MSysObjects].[Name], 3)) = "rpt";
+WHERE Left([MSysObjects].[Name], 3) = "rpt";
 ```
