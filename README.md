@@ -23,6 +23,7 @@ WHERE Left([MSysObjects].[Name], 3) = "rpt";
 ```
 ## VBA
 1. Opening and Renaming Client Data
+
 To-Dos:
 * Test with older versions of Microsoft Excel
 * File not found error handler
