@@ -33,7 +33,7 @@ To-Dos:
 * Create a help file 
 
 Option Compare Database
-
+``` VBA
 Sub Client_Excel_Data()
     'File Location
     Dim Message, Title, File_Location '(For testing, use P:\Test Data\VBA Test Data)
@@ -148,4 +148,4 @@ Message = "Hi" + Chr(13) + "Bye" + File_Location
 Debug.Print Message
 
 End Sub
-
+```
