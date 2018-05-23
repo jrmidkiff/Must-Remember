@@ -22,7 +22,7 @@ FROM MSysObjects
 WHERE Left([MSysObjects].[Name], 3) = "rpt";
 ```
 ## VBA
-1. Opening and Renaming Client Data
+**1. Opening and Renaming Client Data**
 
 To-Dos:
 * Test with older versions of Microsoft Excel
