@@ -21,3 +21,17 @@ SELECT MSysObjects.Name INTO tblTablesMoveAAP
 FROM MSysObjects
 WHERE Left([MSysObjects].[Name], 3) = "rpt";
 ```
+## VBA
+* Module 1 - Opening and Renaming Client Data
+```VBA
+Sub Client_Excel_Data()
+
+Dim Message, Title, File_Location
+Message = "Please enter the full path for the client's excel data"
+Title = "Open Client Data"
+
+File_Location = InputBox(Message, Title)
+Debug.Print File_Location
+
+End Sub
+```
