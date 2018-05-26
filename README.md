@@ -26,26 +26,41 @@ WHERE Left([MSysObjects].[Name], 3) = "rpt";
 
 To-Dos:
 * Test with older versions of Microsoft Excel
-* File not found error handler
 * Add a primary key to each table
-* Add Applicants
-* Create options to skip particular table imports
 * Create a help file 
 ``` VBA
 Option Compare Database
 Global File_Location As String
 
 Function Client_Excel_Data()
+Start:
     'File Location
         
     Dim Message, Title '(For testing, use P:\Test Data\VBA Test Data)
-    Message = "Please enter the full file path for the client's excel data (no quotes or ending slashes '\')"
+    Message = "Please enter the full file path for the client's excel data " & _
+    "(no quotation marks, ending slashes '\', or file extensions)." & _
+        Chr(13) & Chr(13) & _
+        "The tables BOY, EOY, Hires, Promos, Terms, and Applicants must not already be defined in your database. If they are," & _
+        " the import process will append the data to the pre-existing table."
     Title = "Open Client Data"
     File_Location = InputBox(Message, Title)
     
+    If File_Location = "" Then 'If someone wants to exit the main dialogue, bring up a box to let them
+        exit_response = MsgBox("Would you like to end the import process?", vbYesNo, "Exit")
+        If exit_response = 6 Then       '6 = Yes, 7 = No
+            Exit Function
+        Else:
+            GoTo Start
+        End If
+    End If
     Debug.Print File_Location
         
-    BOY_Import
+    import_subroutine ("BOY") 'Run the import subroutine for BOY
+    import_subroutine ("EOY") 'Run the import subroutine for EOY, etc. etc.
+    import_subroutine ("Hires")
+    import_subroutine ("Promos")
+    import_subroutine ("Terms")
+    import_subroutine ("Applicants")
 
     MsgBox "Import Module has concluded. Check to be sure the records totals line up with the excel sheets. " & _
     "If there were any tables in the database with these table names already, the data was appended to them. You must therefore delete the table " & _
@@ -53,141 +68,50 @@ Function Client_Excel_Data()
     "If the client has many blank rows in their Excel data, these will appear in the tables.", vbInformation, "Result"
 
 End Function
+Sub import_subroutine(table)
+Start:
+    Message = "Please enter the exact " & table & " spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
+           & "File Name: '" & File_Location & "'"
+    Title = table & " Import"
     
-    'BOY
-    
-Sub BOY_Import()
-        Debug.Print "File Location is: "; File_Location
-        Message = "Please enter the exact BOY spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
-               & "File Name: '" & File_Location & "'"
-        Title = "BOY Import"
-        
-        BOY_Sheet_Name = InputBox(Message, Title)
-        
-        If BOY_Sheet_Name <> "Skip" Then
-           DoCmd.TransferSpreadsheet acImport, 10, "BOY", File_Location, True, BOY_Sheet_Name & "!"
-           'Create_Autonumber ("BOY") 'Not ready yet!
-           On Error GoTo BOY_Error_Handler
-           
+    Sheet_Name = InputBox(Message, Title)
+    Debug.Print "Table name is: "; table
+    If Sheet_Name = "skip" Then
+       Exit Sub
+    ElseIf Sheet_Name = "" Then 'If someone wants to exit the main dialogue, they can
+        exit_response = MsgBox("Would you like to end the import process?", vbYesNo, "Exit")
+        Debug.Print "Exit Response is: "; exit_response
+        If exit_response = 6 Then       '6 = Yes, 7 = No
+            End
+        Else:
+            GoTo Start
         End If
-        
-        Debug.Print BOY_Sheet_Name
-                
-BOY_Error_Handler:
-        MsgBox "The path for the file name and/or sheet name is invalid. Try again or attempt manual import.", vbCritical, "File Not Found"
-        BOY_Import
-                  
-End Sub
-
-
-
-        'EOY
-        
-Sub EOY_Import()
-
-End Sub
-         Message = "Please enter the exact EOY spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
-                 & "File Name: '" & File_Location & "'"
-         Title = "EOY Import"
-         
-         EOY_Sheet_Name = InputBox(Message, Title)
-         
-         If EOY_Sheet_Name <> "Skip" Then
-             DoCmd.TransferSpreadsheet acImport, 10, "EOY", File_Location, True, EOY_Sheet_Name & "!"
-             'Create_Autonumber ("EOY") 'Not ready yet!
-             On Error GoTo EOY_Import
-             
-         End If
-        
-         Debug.Print EOY_Sheet_Name
-        
-        
-        'Hires
-        
-Hires_Import:
-         Message = "Please enter the exact Hires spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
-                 & "File Name: '" & File_Location & "'"
-         Title = "Hires Import"
-         
-         Hires_Sheet_Name = InputBox(Message, Title)
-         
-         If Hires_Sheet_Name <> "Skip" Then
-             DoCmd.TransferSpreadsheet acImport, 10, "Hires", File_Location, True, Hires_Sheet_Name & "!"
-             'Create_Autonumber ("Hires") 'Not ready yet!
-             On Error GoTo Hires_Import
-             
-         End If
-        
-         Debug.Print Hires_Sheet_Name
-        
-        
-        'Promos
-        
-Promos_Import:
-         Message = "Please enter the exact Promos spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
-                 & "File Name: '" & File_Location & "'"
-         Title = "Promos Import"
-         
-         Promos_Sheet_Name = InputBox(Message, Title)
-         
-         If Promos_Sheet_Name <> "Skip" Then
-             DoCmd.TransferSpreadsheet acImport, 10, "Promos", File_Location, True, Promos_Sheet_Name & "!"
-             'Create_Autonumber ("Promos") 'Not ready yet!
-             On Error GoTo Promos_Import
-             
-         End If
-        
-         Debug.Print Promos_Sheet_Name
-        
-        
-        'Terms
-        
-Terms_Import:
-         Message = "Please enter the exact Terms spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
-                 & "File Name: '" & File_Location & "'"
-         Title = "Terms Import"
-         
-         Terms_Sheet_Name = InputBox(Message, Title)
-         
-         If Terms_Sheet_Name <> "Skip" Then
-             DoCmd.TransferSpreadsheet acImport, 10, "Terms", File_Location, True, Terms_Sheet_Name & "!"
-             'Create_Autonumber ("Terms") 'Not ready yet!
-             On Error GoTo Terms_Import
-             
-         End If
-        
-         Debug.Print Terms_Sheet_Name
-        
-        
-        'Applicants
-        
-Applicants_Import:
-         Message = "Please enter the exact Applicants spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
-                 & "File Name: '" & File_Location & "'"
-         Title = "Applicants Import"
-         
-         Applicants_Sheet_Name = InputBox(Message, Title)
-         
-         If Applicants_Sheet_Name <> "Skip" Then
-             DoCmd.TransferSpreadsheet acImport, 10, "Applicants", File_Location, True, Applicants_Sheet_Name & "!"
-             'Create_Autonumber ("Applicants") 'Not ready yet!
-             On Error GoTo Applicants_Import
-             
-         End If
-        
-         Debug.Print Applicants_Sheet_Name
+    Else
+       On Error GoTo Error_Handler:
+       DoCmd.TransferSpreadsheet acImport, 10, table, File_Location, True, Sheet_Name & "!"
+       'Create_Autonumber ("BOY") 'Not ready yet!
+    End If
     
-
+    Debug.Print "Sheet name is: "; Sheet_Name
+            
+Error_Handler:
+    If Err.Number <> 0 Then
+        Debug.Print Err.Number; Err.Description
+        MsgBox "The path for the file name and/or sheet name is invalid. Try again or attempt manual import.", vbCritical, "File Not Found"
+        Resume Start
+    Else
+        Exit Sub
+    End If
+End Sub
    
-
-Sub Create_Autonumber(Table)
+Sub Create_Autonumber(table)
     'Create an AutoNumber called “Auto_ID” in specified table
     Dim db As DAO.Database
     Dim fld As DAO.Field
     Dim tdf As DAO.TableDef
     
     Set db = Application.CurrentDb
-    Set tdf = db.TableDefs(Table)
+    Set tdf = db.TableDefs(table)
     ' First create a field with datatype = Long Integer
     Set fld = tdf.CreateField("Auto_ID", dbLong)
     With fld
@@ -199,11 +123,18 @@ Sub Create_Autonumber(Table)
     End With
 End Sub
 
+
+
 Sub Test()
-File_Location = "aentsh"
-Message = "Hi" + Chr(13) + "Bye" + File_Location
-Debug.Print Message
+Start:
+    Dim Message, Title '(For testing, use P:\Test Data\VBA Test Data)
+        Message = "Please enter the full file path for the client's excel data (no quotes or ending slashes '\')"
+        Title = "Open Client Data"
+        File_Location = InputBox(Message, Title)
+        Debug.Print "Test File Location is: "; File_Location
+        
 
 End Sub
+
 
 ```
