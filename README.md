@@ -89,7 +89,7 @@ Start:
     Else
        On Error GoTo Error_Handler:
        DoCmd.TransferSpreadsheet acImport, 10, table, File_Location, True, Sheet_Name & "!"
-       'Create_Autonumber ("BOY") 'Not ready yet!
+       Create_Autonumber (table) 'Add an auto-number field to the table
     End If
     
     Debug.Print "Sheet name is: "; Sheet_Name
@@ -105,6 +105,9 @@ Error_Handler:
 End Sub
    
 Sub Create_Autonumber(table)
+    
+' Read this thoroughly!!! https://msdn.microsoft.com/en-us/library/office/ff196791(v=office.14).aspx
+
     'Create an AutoNumber called “Auto_ID” in specified table
     Dim db As DAO.Database
     Dim fld As DAO.Field
@@ -125,16 +128,45 @@ End Sub
 
 
 
-Sub Test()
-Start:
-    Dim Message, Title '(For testing, use P:\Test Data\VBA Test Data)
-        Message = "Please enter the full file path for the client's excel data (no quotes or ending slashes '\')"
-        Title = "Open Client Data"
-        File_Location = InputBox(Message, Title)
-        Debug.Print "Test File Location is: "; File_Location
-        
+Sub AttributesX()
+
+   Dim dbsNorthwind As Database
+   Dim fldLoop As Field
+   Dim relLoop As Relation
+   Dim tdfloop As TableDef
+
+   Set dbsNorthwind = CurrentDb
+
+   With dbsNorthwind
+
+      ' Display the attributes of a TableDef object's
+      ' fields.
+      Debug.Print "Attributes of fields in " & _
+         .TableDefs(0).Name & " table:"
+      For Each fldLoop In .TableDefs(0).Fields
+         Debug.Print "  " & fldLoop.Name & " = " & _
+            fldLoop.Attributes '1 = Date/Time, 2 = Text,
+      Next fldLoop
+
+      ' Display the attributes of the Northwind database's
+      ' relations.
+      Debug.Print "Attributes of relations in " & _
+         .Name & ":"
+      For Each relLoop In .Relations
+         Debug.Print "  " & relLoop.Name & " = " & _
+            relLoop.Attributes
+      Next relLoop
+
+      ' Display the attributes of the Northwind database's
+      ' tables.
+      Debug.Print "Attributes of tables in " & .Name & ":"
+      For Each tdfloop In .TableDefs
+         Debug.Print "  " & tdfloop.Name & " = " & _
+            tdfloop.Attributes
+      Next tdfloop
+
+      .Close
+   End With
 
 End Sub
-
-
 ```
