@@ -25,8 +25,8 @@ WHERE Left([MSysObjects].[Name], 3) = "rpt";
 **1. Opening and Renaming Client Data**
 
 To-Dos:
+* Insert note in first dialogue box recommending to keep excel file open for easy name copy-pasting
 * Test with older versions of Microsoft Excel
-* Add a primary key to each table
 * Create a help file 
 ``` VBA
 Option Compare Database
@@ -63,9 +63,9 @@ Start:
     import_subroutine ("Applicants")
 
     MsgBox "Import Module has concluded. Check to be sure the records totals line up with the excel sheets. " & _
-    "If there were any tables in the database with these table names already, the data was appended to them. You must therefore delete the table " & _
-    "and re-run the macro." & Chr(13) & Chr(13) & _
-    "If the client has many blank rows in their Excel data, these will appear in the tables.", vbInformation, "Result"
+    "If there were any tables in the database with these table names already, the data was appended to them and you probably do not want that." & _
+    Chr(13) & Chr(13) & _
+    "There is now a Primary Key Auto Number field at the end of each table called 'Auto_ID'.", vbInformation, "Result"
 
 End Function
 Sub import_subroutine(table)
@@ -89,7 +89,8 @@ Start:
     Else
        On Error GoTo Error_Handler:
        DoCmd.TransferSpreadsheet acImport, 10, table, File_Location, True, Sheet_Name & "!"
-       Create_Autonumber (table) 'Add an auto-number field to the table
+       Create_Autonumber (table) 'Use the Create_Autonumber sub to create the field 'Auto_ID
+                                 'and have that field set as the primary key
     End If
     
     Debug.Print "Sheet name is: "; Sheet_Name
@@ -105,68 +106,36 @@ Error_Handler:
 End Sub
    
 Sub Create_Autonumber(table)
-    
-' Read this thoroughly!!! https://msdn.microsoft.com/en-us/library/office/ff196791(v=office.14).aspx
-
-    'Create an AutoNumber called “Auto_ID” in specified table
-    Dim db As DAO.Database
-    Dim fld As DAO.Field
-    Dim tdf As DAO.TableDef
-    
-    Set db = Application.CurrentDb
-    Set tdf = db.TableDefs(table)
-    ' First create a field with datatype = Long Integer
-    Set fld = tdf.CreateField("Auto_ID", dbLong)
-    With fld
-    .Attributes = .Attributes Or dbAutoIncrField
-    End With
-    With tdf.Fields
-    .Append fld
-    .Refresh
-    End With
+    If table <> "Applicants" Then
+        strSQL = "Alter Table " & table & " Add Column Auto_ID AutoIncrement, " & _
+        "ERace Text(100), EGender Text(100)"
+    Else
+        strSQL = "Alter Table " & table & " Add Column Auto_ID AutoIncrement"
+    End If
+    Debug.Print strSQL
+    CurrentDb.Execute strSQL
+     
+    strSQL = "Alter Table " & table & " Add Constraint Auto_ID Primary Key(Auto_ID)"
+    Debug.Print strSQL
+    CurrentDb.Execute strSQL
+   
 End Sub
 
-
-
-Sub AttributesX()
-
-   Dim dbsNorthwind As Database
-   Dim fldLoop As Field
-   Dim relLoop As Relation
-   Dim tdfloop As TableDef
-
-   Set dbsNorthwind = CurrentDb
-
-   With dbsNorthwind
-
-      ' Display the attributes of a TableDef object's
-      ' fields.
-      Debug.Print "Attributes of fields in " & _
-         .TableDefs(0).Name & " table:"
-      For Each fldLoop In .TableDefs(0).Fields
-         Debug.Print "  " & fldLoop.Name & " = " & _
-            fldLoop.Attributes '1 = Date/Time, 2 = Text,
-      Next fldLoop
-
-      ' Display the attributes of the Northwind database's
-      ' relations.
-      Debug.Print "Attributes of relations in " & _
-         .Name & ":"
-      For Each relLoop In .Relations
-         Debug.Print "  " & relLoop.Name & " = " & _
-            relLoop.Attributes
-      Next relLoop
-
-      ' Display the attributes of the Northwind database's
-      ' tables.
-      Debug.Print "Attributes of tables in " & .Name & ":"
-      For Each tdfloop In .TableDefs
-         Debug.Print "  " & tdfloop.Name & " = " & _
-            tdfloop.Attributes
-      Next tdfloop
-
-      .Close
-   End With
-
-End Sub
 ```
+**2. Make Final and Exclude Tables**
+To-Dos:
+
+**3. Appear/Disappear**
+To-Dos:
+* Be sure to keep original client field names intact
+* Ask for EmpID and save it for each table
+
+**4. Missing Gender/Race**
+To-Dos:
+* Bring ERace/EGender field creation from Module 1 to this one
+* Ask for Race/Gender field names
+* Create tblERace
+* Update ERace/EGender in each table
+* Note about recommending to re-run "Final" and "Exclude" mktable queries
+* Make full table of all employees
+* Check for missing gender or race and conflicting gender/race
