@@ -125,6 +125,9 @@ End Sub
 **2. Make Final and Exclude Tables**
 To-Dos:
 
+**2.5 Duplicates**
+To-Dos:
+
 **3. Appear/Disappear**
 To-Dos:
 * Be sure to keep original client field names intact
@@ -138,4 +141,5 @@ To-Dos:
 * Update ERace/EGender in each table
 * Note about recommending to re-run "Final" and "Exclude" mktable queries
 * Make full table of all employees
+* Problem: How to account for multiple Hires/Promos/Terms
 * Check for missing gender or race and conflicting gender/race
