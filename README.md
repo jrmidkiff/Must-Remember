@@ -22,15 +22,17 @@ FROM MSysObjects
 WHERE Left([MSysObjects].[Name], 3) = "rpt";
 ```
 ## VBA
-**1. Opening and Renaming Client Data**
+**1. Opening and Renaming Client Data, Creating Main Categories and Moving 'Original Client Data' tables there**
 
 To-Dos:
-* Insert note in first dialogue box recommending to keep excel file open for easy name copy-pasting
+* Test the error-handler in Move_Tables if a table, say Applicants, is missing
 * Test with older versions of Microsoft Excel
 * Create a help file 
+
 ``` VBA
 Option Compare Database
 Global File_Location As String
+Global original_client_data_catid As String
 
 Function Client_Excel_Data()
 Start:
@@ -41,7 +43,9 @@ Start:
     "(no quotation marks, ending slashes '\', or file extensions)." & _
         Chr(13) & Chr(13) & _
         "The tables BOY, EOY, Hires, Promos, Terms, and Applicants must not already be defined in your database. If they are," & _
-        " the import process will append the data to the pre-existing table."
+        " the import process will append the data to the pre-existing table." & _
+        Chr(13) & Chr(13) & _
+        "Keeping the excel file open will make copying field names into the module easier."
     Title = "Open Client Data"
     File_Location = InputBox(Message, Title)
     
@@ -54,14 +58,16 @@ Start:
         End If
     End If
     Debug.Print File_Location
-        
+    
     import_subroutine ("BOY") 'Run the import subroutine for BOY
     import_subroutine ("EOY") 'Run the import subroutine for EOY, etc. etc.
     import_subroutine ("Hires")
     import_subroutine ("Promos")
     import_subroutine ("Terms")
     import_subroutine ("Applicants")
-
+    
+    Call Create_Categories 'This will run the Create_Categories subroutine, but it needs to start with "call"
+    
     MsgBox "Import Module has concluded. Check to be sure the records totals line up with the excel sheets. " & _
     "If there were any tables in the database with these table names already, the data was appended to them and you probably do not want that." & _
     Chr(13) & Chr(13) & _
@@ -70,7 +76,7 @@ Start:
 End Function
 Sub import_subroutine(table)
 Start:
-    Message = "Please enter the exact " & table & " spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
+    Message = "Please enter the exact " & table & " spreadsheet name (not case-sensitive). Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
            & "File Name: '" & File_Location & "'"
     Title = table & " Import"
     
@@ -89,6 +95,7 @@ Start:
     Else
        On Error GoTo Error_Handler:
        DoCmd.TransferSpreadsheet acImport, 10, table, File_Location, True, Sheet_Name & "!"
+       'The above is the command to actually import the data
        Create_Autonumber (table) 'Use the Create_Autonumber sub to create the field 'Auto_ID
                                  'and have that field set as the primary key
     End If
@@ -106,12 +113,7 @@ Error_Handler:
 End Sub
    
 Sub Create_Autonumber(table)
-    If table <> "Applicants" Then
-        strSQL = "Alter Table " & table & " Add Column Auto_ID AutoIncrement, " & _
-        "ERace Text(100), EGender Text(100)"
-    Else
-        strSQL = "Alter Table " & table & " Add Column Auto_ID AutoIncrement"
-    End If
+    strSQL = "Alter Table " & table & " Add Column Auto_ID AutoIncrement"
     Debug.Print strSQL
     CurrentDb.Execute strSQL
      
@@ -120,6 +122,85 @@ Sub Create_Autonumber(table)
     CurrentDb.Execute strSQL
    
 End Sub
+
+'This stuff kept causing the Custom category in the Navigation pane to disappear, so I won't run it
+
+Function Create_Categories()
+    str_insert = "INSERT INTO MSysNavPaneGroups (Flags, GroupCategoryID, Name, [Object Type Group], ObjectID, Position)"
+    str_sql = str_insert & " VALUES (0, 3, 'Original Client Data', -1, 0, 0);"
+    Debug.Print "The Category string is: "; str_final
+    CurrentDb.Execute str_sql 'The table "MSysNavPaneGroups' controls all of the categories that appear in the database window.
+    ' Adding in records to that table in the specified format will create these categories.
+        
+    original_client_data_catid = DLookup("[Id]", "MSysNavPaneGroups", "[Name] = 'Original Client Data'")
+    Debug.Print "ID for the 'Original Client Data categories is: "; original_client_data_catid
+        
+    Move_Table ("BOY")
+    Move_Table ("EOY")
+    Move_Table ("Hires")
+    Move_Table ("Promos")
+    Move_Table ("Terms")
+    Move_Table ("Applicants")
+        
+    str_sql = str_insert & " VALUES (0, 3, 'Final Client Data', -1, 0, 1);"
+    Debug.Print str_final
+    CurrentDb.Execute str_sql
+
+    str_sql = str_insert & " VALUES (0, 3, 'Exclude', -1, 0, 2);"
+    Debug.Print str_final
+    CurrentDb.Execute str_sql
+
+    str_sql = str_insert & " VALUES (0, 3, 'Appear/Disappear', -1, 0, 3);"
+    Debug.Print str_final
+    CurrentDb.Execute str_sql
+    
+    str_sql = str_insert & " VALUES (0, 3, 'Duplicates', -1, 0, 4);"
+    Debug.Print str_final
+    CurrentDb.Execute str_sql
+
+    str_sql = str_insert & " VALUES (0, 3, 'Missing Race/Gender', -1, 0, 5);"
+    Debug.Print str_final
+    CurrentDb.Execute str_sql
+    
+    str_sql = str_insert & " VALUES (0, 3, 'Miscellaneous', -1, 0, 6);"
+    Debug.Print str_final
+    CurrentDb.Execute str_sql
+
+    str_sql = str_insert & " VALUES (0, 3, 'Hires Applicants Matching', -1, 0, 7);"
+    Debug.Print str_final
+    CurrentDb.Execute str_sql
+
+    Application.RefreshDatabaseWindow 'This refresh is necessary for the categories to appear. I think.
+    DoCmd.NavigateTo ("Custom")
+    
+    
+End Function
+
+Public Function Move_Table(table)
+    Dim table_object_id As String
+    Debug.Print table
+    On Error GoTo Error_Handler
+    table_object_id = DLookup("[Id]", "MSysObjects", "[Name] = '" & table & "'")
+    Debug.Print "Table is: "; table; " and Object_ID is: "; table_object_id
+    
+    str_move = "INSERT INTO MSysNavPaneGroupToObjects (Flags, GroupID, Icon, Name, ObjectID)"
+    str_sql = str_move & " VALUES (0, " & original_client_data_catid & ", 0, '" & table & "', " & table_object_id & ");"
+    Debug.Print str_sql
+    
+    
+    CurrentDb.Execute str_sql
+    
+Error_Handler:
+    If Err.Number <> 0 Then
+        Debug.Print "Error Code: "; Err.Number; " Error Description: "; Err.Description
+        Err.Clear
+        Exit Function
+    Else
+        Exit Function
+    End If
+    
+End Function
+
 
 ```
 **2. Make Final and Exclude Tables**
@@ -143,3 +224,7 @@ To-Dos:
 * Make full table of all employees
 * Problem: How to account for multiple Hires/Promos/Terms
 * Check for missing gender or race and conflicting gender/race
+
+**5. Hires and Applicants Matching**
+To-Dos:
+* Jesus fuck there's a long road for me to get here
