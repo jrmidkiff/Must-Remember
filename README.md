@@ -203,8 +203,9 @@ End Function
 **2. Make Final and Exclude Tables**
 To-Dos:
 
-Option Compare Database
 ```VBA
+Option Compare Database
+
 Function Final_and_Exclude_Queries()
     prompt_response = MsgBox("This module will: " & Chr(13) & Chr(13) & _
         "1) Add Notes and Exclude fields to each table" & Chr(13) & _
