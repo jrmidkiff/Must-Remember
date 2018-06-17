@@ -76,7 +76,7 @@ Start:
 End Function
 Sub import_subroutine(table)
 Start:
-    Message = "Please enter the exact " & table & " spreadsheet name (not case-sensitive). Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
+    Message = "Please enter the exact " & table & " spreadsheet name. Enter 'skip' to skip importing this file." & Chr(13) & Chr(13) _
            & "File Name: '" & File_Location & "'"
     Title = table & " Import"
     
@@ -122,8 +122,6 @@ Sub Create_Autonumber(table)
     CurrentDb.Execute strSQL
    
 End Sub
-
-'This stuff kept causing the Custom category in the Navigation pane to disappear, so I won't run it
 
 Function Create_Categories()
     str_insert = "INSERT INTO MSysNavPaneGroups (Flags, GroupCategoryID, Name, [Object Type Group], ObjectID, Position)"
@@ -176,7 +174,7 @@ Function Create_Categories()
     
 End Function
 
-Public Function Move_Table(table)
+Function Move_Table(table)
     Dim table_object_id As String
     Debug.Print table
     On Error GoTo Error_Handler
@@ -200,11 +198,116 @@ Error_Handler:
     End If
     
 End Function
-
-
 ```
+
 **2. Make Final and Exclude Tables**
 To-Dos:
+
+Option Compare Database
+```VBA
+Function Final_and_Exclude_Queries()
+    prompt_response = MsgBox("This module will: " & Chr(13) & Chr(13) & _
+        "1) Add Notes and Exclude fields to each table" & Chr(13) & _
+        "2) Create and move the queries to make the Final and Exclude tables" & Chr(13) & Chr(13) & _
+        "Would you like to run this module?", 68, "Final and Exclude Queries")
+        '68 is the sum of 4 and 64 which correspond to vbYesNo and vbInformation respectively.
+        'Search in AccessHelp for "MsgBox" for more info on this weird way of doing things
+    If prompt_response = 6 Then       '6 = Yes, 7 = No
+        'Add_Notes_and_Exclude ("BOY")
+        'Add_Notes_and_Exclude ("EOY")
+        'Add_Notes_and_Exclude ("Hires")
+        'Add_Notes_and_Exclude ("Promos")
+        'Add_Notes_and_Exclude ("Terms")
+        'Add_Notes_and_Exclude ("Applicants")
+        
+        The_Queries ("BOY")
+        The_Queries ("EOY")
+        The_Queries ("Hires")
+        The_Queries ("Promos")
+        The_Queries ("Terms")
+    
+    MsgBox "The Final and Exclude Module has concluded. Check to be sure the queries have been set-up correctly (they have not been run). " & _
+    "Each table will now have a field called 'NTL_Exclude' and 'NTL_Notes' at the end, which you should fill in throughout the validation process.", vbInformation, "Result"
+    
+    Else:
+        Exit Function
+    End If
+    
+    
+End Function
+
+Sub Add_Notes_and_Exclude(table)
+    On Error Resume Next ' If an error occurs, this will silently ignore it and go to the
+                         ' next statement
+    strSQL_exclude = "Alter Table " & table & " Add Column NTL_Exclude Text;"
+    strSQL_notes = "Alter Table " & table & " Add Column NTL_Notes Text;"
+    
+    'CurrentDb.Execute strSQL_exclude
+    'CurrentDb.Execute strSQL_notes
+End Sub
+
+Function The_Queries(table)
+    Dim qdf As DAO.QueryDef
+    
+    '1. Creating the final_table queries
+    Set qdf = CurrentDb.CreateQueryDef("qryFinal_" & table)
+    Application.RefreshDatabaseWindow
+    
+    str_sql_final = "SELECT " & table & ".* INTO tblFinal_" & table & _
+              " FROM " & table & _
+              " WHERE (((" & table & ".NTL_Exclude) Is Null));"
+    Debug.Print str_sql_final
+    qdf.SQL = str_sql_final
+    
+    '1A. Moving the final_table queries into "Final Client Data" category
+    Dim Final_Client_Data_catid As String
+    Final_Client_Data_catid = DLookup("[Id]", "MSysNavPaneGroups", "[Name] = 'Final Client Data'")
+    Debug.Print "Destination_Category ID: "; Final_Client_Data_catid
+    
+    Call Move_This_Object("qryFinal_" & table, Final_Client_Data_catid)
+    
+    '2. Creating the exclude queries
+    Set qdf = CurrentDb.CreateQueryDef("qryExclude_" & table)
+    Application.RefreshDatabaseWindow
+    
+    str_sql_Exclude = "SELECT " & table & ".* INTO tblExclude_" & table & _
+              " FROM " & table & _
+              " WHERE (((" & table & ".NTL_Exclude) Is Not Null));"
+    Debug.Print str_sql_Exclude
+    qdf.SQL = str_sql_Exclude
+    
+    '2A. Moving the exclude queries into the "Exclude" category
+    Dim Exclude_catid As String
+    Exclude_catid = DLookup("[Id]", "MSysNavPaneGroups", "[Name] = 'Exclude'")
+    Debug.Print "Destination_Category ID: "; Exclude_catid
+    
+    Call Move_This_Object("qryExclude_" & table, Exclude_catid)
+    
+End Function
+
+Public Sub Move_This_Object(object, destination_category_id) 'This is the function that is being called from other modules to move queries and tables
+    Dim table_object_id As String
+        
+    On Error GoTo Error_Handler
+    object_object_id = DLookup("[Id]", "MSysObjects", "[Name] = '" & object & "'")
+    Debug.Print "Object is: "; object; " and Object_ID is: "; object_object_id
+    
+    str_move = "INSERT INTO MSysNavPaneGroupToObjects (Flags, GroupID, Icon, Name, ObjectID)"
+    str_sql = str_move & " VALUES (0, " & destination_category_id & ", 0, '" & object & "', " & object_object_id & ");"
+    Debug.Print "Insert (aka movement) string: "; str_sql
+
+    CurrentDb.Execute str_sql
+    
+Error_Handler:
+    If Err.Number <> 0 Then
+        Debug.Print "Error Code: "; Err.Number; " Error Description: "; Err.Description
+        Err.Clear
+        Exit Sub
+    Else
+        Exit Sub
+    End If
+End Sub
+```
 
 **2.5 Duplicates**
 To-Dos:
