@@ -210,16 +210,16 @@ Function Final_and_Exclude_Queries()
     prompt_response = MsgBox("This module will: " & Chr(13) & Chr(13) & _
         "1) Add Notes and Exclude fields to each table" & Chr(13) & _
         "2) Create and move the queries to make the Final and Exclude tables" & Chr(13) & Chr(13) & _
-        "Would you like to run this module?", 68, "Final and Exclude Queries")
+        "The tables must be closed prior to running this module. Would you like to proceed?", 68, "Final and Exclude Queries")
         '68 is the sum of 4 and 64 which correspond to vbYesNo and vbInformation respectively.
         'Search in AccessHelp for "MsgBox" for more info on this weird way of doing things
     If prompt_response = 6 Then       '6 = Yes, 7 = No
-        'Add_Notes_and_Exclude ("BOY")
-        'Add_Notes_and_Exclude ("EOY")
-        'Add_Notes_and_Exclude ("Hires")
-        'Add_Notes_and_Exclude ("Promos")
-        'Add_Notes_and_Exclude ("Terms")
-        'Add_Notes_and_Exclude ("Applicants")
+        Add_Notes_and_Exclude ("BOY")
+        Add_Notes_and_Exclude ("EOY")
+        Add_Notes_and_Exclude ("Hires")
+        Add_Notes_and_Exclude ("Promos")
+        Add_Notes_and_Exclude ("Terms")
+        Add_Notes_and_Exclude ("Applicants")
         
         The_Queries ("BOY")
         The_Queries ("EOY")
@@ -243,8 +243,8 @@ Sub Add_Notes_and_Exclude(table)
     strSQL_exclude = "Alter Table " & table & " Add Column NTL_Exclude Text;"
     strSQL_notes = "Alter Table " & table & " Add Column NTL_Notes Text;"
     
-    'CurrentDb.Execute strSQL_exclude
-    'CurrentDb.Execute strSQL_notes
+    CurrentDb.Execute strSQL_exclude
+    CurrentDb.Execute strSQL_notes
 End Sub
 
 Function The_Queries(table)
@@ -308,10 +308,12 @@ Error_Handler:
         Exit Sub
     End If
 End Sub
+
 ```
 
 **2.5 Duplicates**
 To-Dos:
+* I think it unfortunately may make the most sense to create a form to ask for the relevant fields :/
 
 **3. Appear/Disappear**
 To-Dos:
