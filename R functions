@@ -203,3 +203,27 @@ my_summarise <- function(df, ...) {
 }
 
 my_summarise(df, g1, g2)
+
+####################
+# Importing multiple excel files into R and appending them
+library(tidyverse) # these are library statements that require that you already have the package installed
+                    # tidyverse is the most important series of packages for data analysis
+library(readxl)    # readxl is a package for reading excel
+library(RODBC)    # RODBC is a package for interfacing with databases (R - Open DataBase Connection) such as Access
+
+setwd("Z:/Nestlé/2020/Data/All Applicant Data")  # Sets the working directory, where all the applicant files are located
+(file.list <- grep(pattern = "^((?!Old).)*(?=Compliance)+((?!Old).*)\\.xlsx$", x = list.files(recursive = T), perl = T,
+                   value = T)) 
+# grep is a text search function, using Regular Expressions to only select the files you need
+# You will have to rewrite the working directory and the grep pattern text to detect ALL OF and ONLY the files you want
+# For info on Regular Expresions in R, see this cheat sheet: https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf
+# Site for testing regex (note that R requires \\ before something to use its special ability, while most other 
+# sites including this one do not), see here: https://regex101.com/
+
+(df.list <- sapply(file.list, read_excel, col_names = F, simplify = F)) #sapply is a function that applies a function to multiple things, 
+    # in that it applies the function read_excel to file.list multiple times
+    # it creates a list called df.list
+    # For info on how file.list and df.list work together, see here: https://stackoverflow.com/questions/32888757/how-can-i-read-multiple-excel-files-into-r
+    # use str() on any object to determine its structure
+
+(Combined_Purina_App_Data <- bind_rows(df.list, .id = "File Source"))
